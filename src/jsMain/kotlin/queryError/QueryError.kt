@@ -1,0 +1,3 @@
+package queryError
+
+external interface QueryError
