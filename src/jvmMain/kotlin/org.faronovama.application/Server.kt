@@ -13,6 +13,8 @@ import kotlinx.coroutines.delay
 import kotlinx.html.*
 import org.faronovama.application.database.teacherRepo
 import org.faronovama.application.database.teachersCollection
+import org.faronovama.application.rest.groupsRoutes
+import org.faronovama.application.rest.scheduleRoutes
 import org.faronovama.application.rest.teachersRoutes
 
 fun main() {
@@ -58,7 +60,7 @@ fun HTML.index() {
     body {
         div {
             id = "root"
-            +"Hello from Ktor"
+            +"Идет загрузка приложения"
         }
         script(src = "/static/courseWork.js") {}
     }
@@ -67,6 +69,8 @@ fun HTML.index() {
 fun Application.rest() {
     routing {
         teachersRoutes()
+        scheduleRoutes()
+        groupsRoutes()
     }
 }
 
