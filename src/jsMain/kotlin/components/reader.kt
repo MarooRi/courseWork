@@ -1,5 +1,6 @@
 package components
 
+import Config
 import react.FC
 import react.Props
 import react.dom.html.ButtonType
@@ -13,7 +14,7 @@ val reader = FC<Props> {
         name = "file"
         encType = "multipart/form-data"
         method = FormMethod.post
-        action = "${Config.schedule}loadSchedule"
+        action = "${Config.schedule}loadExcel"
         ReactHTML.div {
             ReactHTML.label {
                 form = "file"

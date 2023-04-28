@@ -17,7 +17,30 @@ import org.litote.kmongo.*
 
 fun Route.scheduleRoutes() {
     route(Config.schedule) {
-        post("loadSchedule") {
+        get("{teacherName}") {
+            val teacherName = call.parameters["teacherName"] ?: return@get call.respondText(
+                "Missing or malformed id", status = HttpStatusCode.BadRequest
+            )
+
+            val teacher = teachersCollection.findOne(Teacher::fullName eq teacherName)
+                ?: return@get call.respondText("Нет учителя с таким именем", status = HttpStatusCode.NotFound)
+
+            call.respond(teacher.table)
+        }
+        get("namesFromExcel/{fileName}") {
+            val fileName = call.parameters["fileName"] ?: return@get call.respondText(
+                "No file name",
+                status = HttpStatusCode.NotFound
+            )
+
+            val teachers = readTeachersFromExcel("uploads/$fileName")
+            if (teachers.isEmpty()) {
+                return@get call.respondText("Empty file", status = HttpStatusCode.NotFound)
+            } else {
+                call.respond(teachers)
+            }
+        }
+        post("loadExcel") {
             val multiPartData = call.receiveMultipart()
             var fileName = ""
 
@@ -33,7 +56,6 @@ fun Route.scheduleRoutes() {
                 }
                 part.dispose()
             }
-
             if (!fileName.endsWith(".xlsx")) {
                 File("uploads/$fileName").delete()
                 return@post call.respondRedirect("/")
@@ -43,31 +65,10 @@ fun Route.scheduleRoutes() {
                 teachersCollection.insertMany(teachers)
                 */
             }
+        }
+        post("loadSchedule") {
 
         }
-
-        get("{teacherName}") {
-            val teacherName = call.parameters["teacherName"] ?: return@get call.respondText(
-                "Missing or malformed id", status = HttpStatusCode.BadRequest
-            )
-
-            val teacher = teachersCollection.findOne(Teacher::fullName eq teacherName)
-                ?: return@get call.respondText("Нет учителя с таким именем", status = HttpStatusCode.NotFound)
-
-            call.respond(teacher.table)
-        }
-        get("namesFromExcel") {
-            val fileName = call.receive<String>()
-
-            val teachers = readTeachersFromExcel("uploads/$fileName")
-
-            if (teachers.isEmpty()) {
-                return@get call.respondText("Empty file", status = HttpStatusCode.NotFound)
-            } else {
-                call.respond(teachers)
-            }
-        }
-
         put("updateLesson") {
             val updateData = call.receive<UpdateSchedule>()
 

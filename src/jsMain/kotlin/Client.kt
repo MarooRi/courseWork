@@ -1,34 +1,18 @@
-import classes.*
-import components.CButtons
+import classes.Teacher
+import classes.TimeTable
 import components.CTable
 import components.reader
-import csstype.*
-import emotion.react.css
-import js.core.Record
 import js.core.get
-import js.core.jso
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import queryError.QueryError
-import react.*
+import react.FC
+import react.Props
+import react.create
 import react.dom.client.createRoot
-import react.dom.html.ButtonType
-import react.dom.html.FormMethod
-import react.dom.html.ReactHTML
-import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.form
-import react.dom.html.ReactHTML.input
-import react.dom.html.ReactHTML.label
-import react.dom.html.ReactHTML.legend
-import react.dom.html.ReactHTML.span
-import react.dom.html.ReactHTML.style
-import react.dom.html.ReactHTML.table
-import react.dom.html.ReactHTML.td
-import react.dom.html.ReactHTML.thead
-import react.dom.html.ReactHTML.tr
-import react.router.Params
+import react.dom.html.ReactHTML.option
+import react.dom.html.ReactHTML.select
 import react.router.Route
 import react.router.Routes
 import react.router.dom.HashRouter
@@ -37,15 +21,9 @@ import tanstack.query.core.QueryClient
 import tanstack.query.core.QueryKey
 import tanstack.react.query.QueryClientProvider
 import tanstack.react.query.devtools.ReactQueryDevtools
-import tanstack.react.query.useMutation
 import tanstack.react.query.useQuery
-import tanstack.react.query.useQueryClient
-import tools.HTTPResult
-import tools.fetch
 import tools.fetchText
 import web.dom.document
-import web.html.InputType
-import kotlin.js.json
 
 fun main() {
     val container = document.getElementById("root")!!
@@ -56,18 +34,38 @@ val app = FC<Props>("App") {
     HashRouter {
         QueryClientProvider {
             client = QueryClient()
-            //container { }
-
             ReactQueryDevtools { }
 
             Routes {
                 Route {
                     path = "/home/:file"
-                    element = container.create {}
+                    element = teacherChoose.create {}
                 }
                 Route {
                     path = "/"
-                    element =  reader.create()
+                    element = reader.create()
+                }
+            }
+        }
+    }
+}
+
+val teacherChoose = FC<Props> {
+    val param = useParams()["file"]!!
+
+    val query = useQuery<String, QueryError, String, QueryKey>(
+        queryKey = arrayOf("teachersNames").unsafeCast<QueryKey>(),
+        queryFn = {
+            fetchText(Config.schedule + "namesFromExcel/${param}")
+        })
+
+    if (query.isSuccess) {
+        val data = Json.decodeFromString<List<Teacher>>(query.data ?: "")
+
+        select {
+            data.map {
+                option {
+                    +it.fullName
                 }
             }
         }
@@ -75,7 +73,6 @@ val app = FC<Props>("App") {
 }
 
 val container = FC<Props> {
-    val param = useParams()["file"]
 
     val query = useQuery<String, QueryError, String, QueryKey>(
         queryKey = arrayOf("teacherLessons").unsafeCast<QueryKey>(),

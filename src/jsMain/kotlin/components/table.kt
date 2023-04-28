@@ -1,5 +1,6 @@
 package components
 
+import Config
 import classes.*
 import components.lessons.CEditLesson
 import components.lessons.CLesson
@@ -9,7 +10,6 @@ import react.Props
 import react.dom.html.ReactHTML
 import react.useState
 import styles.Styles
-
 import tanstack.query.core.QueryKey
 import tanstack.react.query.useMutation
 import tanstack.react.query.useQueryClient
