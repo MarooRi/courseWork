@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TimeTable(
-    val upWeek: List<Day>,
-    val lowWeek: List<Day>
+    var upWeek: List<Day>,
+    var lowWeek: List<Day>
 )

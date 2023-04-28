@@ -69,6 +69,14 @@ kotlin {
                 implementation("org.litote.kmongo:kmongo-serialization:4.8.0")
                 implementation("org.litote.kmongo:kmongo-id-serialization:4.8.0")
                 implementation("org.json:json:20230227")
+
+                implementation ("org.apache.logging.log4j:log4j-api:2.20.0")
+                implementation ("org.apache.logging.log4j:log4j-core:2.20.0")
+                implementation ("org.apache.poi:poi:5.2.2")
+                implementation ("org.apache.poi:poi-ooxml:5.2.2")
+                implementation ("org.apache.logging.log4j:log4j-api:2.17.2")
+                implementation ("org.apache.logging.log4j:log4j-core:2.17.2")
+                implementation ("org.apache.xmlbeans:xmlbeans:5.0.3")
             }
         }
         val jvmTest by getting

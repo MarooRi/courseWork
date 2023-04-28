@@ -1,26 +1,51 @@
-
-import classes.Teacher
-import classes.TimeTable
+import classes.*
+import components.CButtons
+import components.CTable
+import components.reader
+import csstype.*
+import emotion.react.css
+import js.core.Record
+import js.core.get
+import js.core.jso
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import queryError.QueryError
-import react.FC
-import react.Props
-import react.create
+import react.*
 import react.dom.client.createRoot
+import react.dom.html.ButtonType
 import react.dom.html.FormMethod
 import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.li
-import react.dom.html.ReactHTML.ol
+import react.dom.html.ReactHTML.form
+import react.dom.html.ReactHTML.input
+import react.dom.html.ReactHTML.label
+import react.dom.html.ReactHTML.legend
+import react.dom.html.ReactHTML.span
+import react.dom.html.ReactHTML.style
+import react.dom.html.ReactHTML.table
+import react.dom.html.ReactHTML.td
+import react.dom.html.ReactHTML.thead
+import react.dom.html.ReactHTML.tr
+import react.router.Params
+import react.router.Route
+import react.router.Routes
 import react.router.dom.HashRouter
+import react.router.useParams
 import tanstack.query.core.QueryClient
 import tanstack.query.core.QueryKey
 import tanstack.react.query.QueryClientProvider
 import tanstack.react.query.devtools.ReactQueryDevtools
+import tanstack.react.query.useMutation
 import tanstack.react.query.useQuery
+import tanstack.react.query.useQueryClient
+import tools.HTTPResult
+import tools.fetch
 import tools.fetchText
 import web.dom.document
+import web.html.InputType
+import kotlin.js.json
 
 fun main() {
     val container = document.getElementById("root")!!
@@ -28,43 +53,56 @@ fun main() {
 }
 
 val app = FC<Props>("App") {
+    HashRouter {
         QueryClientProvider {
             client = QueryClient()
-            container{ }
+            //container { }
+
             ReactQueryDevtools { }
-        }
-}
 
-val container = FC<Props> {
-    val query = useQuery<String, QueryError, String, QueryKey>(
-        queryKey = arrayOf("1").unsafeCast<QueryKey>(),
-        queryFn = {
-            fetchText(Config.teachers)
-        }
-    )
-
-    div {
-        + "Hello!"
-    }
-    if (query.isLoading) {
-        div {
-            +" l o a d i n g . . . \uD83D\uDD01"
-        }
-    }else {
-        if (query.isError){
-            div {
-                +" e r r o r . . . ❌"
-            }
-        }else {
-
-            val data = Json.decodeFromString<List<Teacher>>(query.data ?: "")
-            ol {
-                data.map {
-                    li {
-                        +it.fullName
-                    }
+            Routes {
+                Route {
+                    path = "/home/:file"
+                    element = container.create {}
+                }
+                Route {
+                    path = "/"
+                    element =  reader.create()
                 }
             }
         }
     }
 }
+
+val container = FC<Props> {
+    val param = useParams()["file"]
+
+    val query = useQuery<String, QueryError, String, QueryKey>(
+        queryKey = arrayOf("teacherLessons").unsafeCast<QueryKey>(),
+        queryFn = {
+            fetchText(Config.schedule + "доц. Альтман Е.А.")
+        })
+
+    if (query.isLoading) {
+        div {
+            +"Loading"
+        }
+    } else if (query.isError) {
+        div {
+            +"Error"
+        }
+    } else {
+        val lessons = Json.decodeFromString<TimeTable>(query.data ?: "")
+
+        CTable {
+            table = lessons
+        }
+    }
+}
+
+
+
+
+
+
+

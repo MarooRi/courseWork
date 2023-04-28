@@ -11,8 +11,6 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
 import kotlinx.html.*
-import org.faronovama.application.database.teacherRepo
-import org.faronovama.application.database.teachersCollection
 import org.faronovama.application.rest.groupsRoutes
 import org.faronovama.application.rest.scheduleRoutes
 import org.faronovama.application.rest.teachersRoutes
@@ -31,7 +29,6 @@ fun main() {
 fun Application.main() {
     static()
     rest()
-    //teachersCollection.insertOne(teacherRepo)
 }
 
 fun Application.static() {
