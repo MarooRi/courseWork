@@ -13,7 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.html.*
 import org.faronovama.application.rest.groupsRoutes
 import org.faronovama.application.rest.scheduleRoutes
-import org.faronovama.application.rest.teachersRoutes
 
 fun main() {
     embeddedServer(
@@ -65,7 +64,7 @@ fun HTML.index() {
 
 fun Application.rest() {
     routing {
-        teachersRoutes()
+        //teachersRoutes()
         scheduleRoutes()
         groupsRoutes()
     }

@@ -73,7 +73,6 @@ val teacherChoose = FC<Props> {
 }
 
 val container = FC<Props> {
-
     val query = useQuery<String, QueryError, String, QueryKey>(
         queryKey = arrayOf("teacherLessons").unsafeCast<QueryKey>(),
         queryFn = {

@@ -10,17 +10,8 @@ import org.faronovama.application.database.teachersCollection
 import org.litote.kmongo.*
 
 
-fun Route.teachersRoutes() {
+/*fun Route.teachersRoutes() {
     route(Config.teachers) {
-        get {
-            val teachers = teachersCollection.find().toList()
-            
-            if (teachers.isEmpty()) {
-                call.respondText("No element found", status = HttpStatusCode.NotFound)
-            } else {
-                call.respond(teachers)
-            }
-        }
         get("allNames"){
             val teachersNames = teachersCollection.projection(Teacher::fullName).toList()
 
@@ -31,4 +22,4 @@ fun Route.teachersRoutes() {
             }
         }
     }
-}
+}*/

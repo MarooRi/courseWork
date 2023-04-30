@@ -33,7 +33,7 @@ fun Route.scheduleRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
-            val teachers = readTeachersFromExcel("uploads/$fileName")
+            val teachers = readTeachersFromExcel("uploads/$fileName").map { it.fullName }
             if (teachers.isEmpty()) {
                 return@get call.respondText("Empty file", status = HttpStatusCode.NotFound)
             } else {
@@ -61,13 +61,19 @@ fun Route.scheduleRoutes() {
                 return@post call.respondRedirect("/")
             } else {
                 return@post call.respondRedirect("/#/home/${fileName}")
-                /*val teachers = readTeachersFromExcel("./uploads/${fileName}")
-                teachersCollection.insertMany(teachers)
-                */
             }
         }
-        post("loadSchedule") {
+        post("loadSchedule/{fileName}") {
+            val teachersName = call.receive<List<String>>()
+            val fileName =
+                call.parameters["fileName"] ?: call.respondText("No file name", status = HttpStatusCode.NotFound)
 
+            if (teachersName.isEmpty()) {
+                call.respondText("No teachers name", status = HttpStatusCode.NotFound)
+            } else {
+                val teachers = readTeachersFromExcel("./uploads/${fileName}")
+                teachersCollection.insertMany(teachers)
+            }
         }
         put("updateLesson") {
             val updateData = call.receive<UpdateSchedule>()
