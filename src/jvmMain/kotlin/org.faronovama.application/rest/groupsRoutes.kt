@@ -4,6 +4,8 @@ import classes.Day
 import classes.Lesson
 import classes.Teacher
 import classes.TimeTable
+import io.ktor.server.application.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import org.faronovama.application.database.teachersCollection
@@ -20,7 +22,9 @@ fun Route.groupsRoutes() {
                     unwind("\$week"),
                     project(UnwindD::classes from UnwindDay::week / Day::classes),
                     unwind("\$classes")
-                ).toList().map { it.classes.group }.toSet()
+                ).map { it.classes.group }.flatten().toSet()
+
+            call.respond(upWeek)
             //println(upWeek)
             //println(System.currentTimeMillis())
             /*prettyPrintCursor(teachersCollection.aggregate<UnwindTimeTable>(
