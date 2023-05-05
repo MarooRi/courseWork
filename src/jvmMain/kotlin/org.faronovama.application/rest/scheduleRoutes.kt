@@ -1,6 +1,8 @@
 package org.faronovama.application.rest
 
-import classes.*
+import Config
+import classes.Teacher
+import classes.UpdateSchedule
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -9,10 +11,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
+import org.faronovama.application.database.loadSelectTeachers
+import org.faronovama.application.database.readListTeachers
 import org.faronovama.application.database.teachersCollection
+import org.litote.kmongo.eq
+import org.litote.kmongo.findOne
+import org.litote.kmongo.updateMany
 import java.io.File
-import org.faronovama.application.database.readTeachersFromExcel
-import org.litote.kmongo.*
 
 
 fun Route.scheduleRoutes() {
@@ -33,7 +38,7 @@ fun Route.scheduleRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
-            val teachers = readTeachersFromExcel("uploads/$fileName").map { it.fullName }
+            val teachers = readListTeachers("uploads/$fileName")
             if (teachers.isEmpty()) {
                 return@get call.respondText("Empty file", status = HttpStatusCode.NotFound)
             } else {
@@ -71,8 +76,7 @@ fun Route.scheduleRoutes() {
             if (teachersName.isEmpty()) {
                 call.respondText("No teachers name", status = HttpStatusCode.NotFound)
             } else {
-                val teachers = readTeachersFromExcel("./uploads/${fileName}")
-                teachersCollection.insertMany(teachers)
+                loadSelectTeachers(teachersName, "./uploads/${fileName}", )
             }
         }
         put("updateLesson") {
@@ -86,4 +90,21 @@ fun Route.scheduleRoutes() {
             )
         }
     }
+}
+
+fun checkUpdateSchedule(week: UpdateSchedule): Boolean {
+    val regex = Regex("\\d-\\d{3}[а-я]?")
+
+    if (week.teacherName.isBlank()) return false
+
+    week.week.map {
+        if (it.classes.isEmpty()) return false
+
+        it.classes.map { les ->
+            if (les.classRoom.isBlank() || les.group.isEmpty() || les.name.isBlank()) return false
+
+            if (regex.findAll(les.classRoom).toList().isEmpty()) return false
+        }
+    }
+    return true
 }

@@ -1,5 +1,6 @@
 package org.faronovama.application.rest
 
+import Config
 import classes.Day
 import classes.Lesson
 import classes.Teacher
@@ -21,7 +22,7 @@ fun Route.groupsRoutes() {
                     ),
                     unwind("\$week"),
                     project(UnwindD::classes from UnwindDay::week / Day::classes),
-                    unwind("\$classes")
+                    unwind("\$classes"),
                 ).map { it.classes.group }.flatten().toSet()
 
             call.respond(upWeek)

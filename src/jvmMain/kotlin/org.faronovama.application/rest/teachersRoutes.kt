@@ -7,10 +7,10 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.faronovama.application.database.teachersCollection
-import org.litote.kmongo.*
+import org.litote.kmongo.projection
 
 
-/*fun Route.teachersRoutes() {
+fun Route.teachersRoutes() {
     route(Config.teachers) {
         get("allNames"){
             val teachersNames = teachersCollection.projection(Teacher::fullName).toList()
@@ -22,4 +22,4 @@ import org.litote.kmongo.*
             }
         }
     }
-}*/
+}

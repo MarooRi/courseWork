@@ -55,6 +55,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
+                implementation("io.ktor:ktor-server-websockets:$ktorVersion")
                 implementation("io.ktor:ktor-server-core:$ktorVersion")
                 implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
@@ -69,7 +70,6 @@ kotlin {
                 implementation("org.litote.kmongo:kmongo-serialization:4.8.0")
                 implementation("org.litote.kmongo:kmongo-id-serialization:4.8.0")
                 implementation("org.json:json:20230227")
-
                 implementation ("org.apache.logging.log4j:log4j-api:2.20.0")
                 implementation ("org.apache.logging.log4j:log4j-core:2.20.0")
                 implementation ("org.apache.poi:poi:5.2.2")
