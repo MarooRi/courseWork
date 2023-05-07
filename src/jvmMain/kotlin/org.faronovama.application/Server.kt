@@ -29,12 +29,6 @@ fun main() {
         host = "127.0.0.1",
         watchPaths = listOf("classes")
     ) {
-        install(WebSockets) {
-            pingPeriod = Duration.ofSeconds(15)
-            timeout = Duration.ofSeconds(15)
-            maxFrameSize = Long.MAX_VALUE
-            masking = false
-        }
         main()
     }.start(wait = true)
 }
@@ -83,20 +77,6 @@ fun Application.rest() {
         teachersRoutes()
         scheduleRoutes()
         groupsRoutes()
-
-        webSocket("/echo") {
-                send("Please enter your name")
-                for (frame in incoming) {
-                    frame as? Frame.Text ?: continue
-                    val receivedText = frame.readText()
-                    if (receivedText.equals("bye", ignoreCase = true)) {
-                        close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-                    } else {
-                        send(Frame.Text("Hi, $receivedText!"))
-                    }
-                }
-            }
-
     }
 }
 
