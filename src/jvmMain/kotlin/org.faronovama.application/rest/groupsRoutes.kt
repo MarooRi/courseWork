@@ -1,10 +1,8 @@
 package org.faronovama.application.rest
 
 import Config
-import classes.Day
-import classes.Lesson
-import classes.Teacher
-import classes.TimeTable
+import classes.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -12,65 +10,96 @@ import kotlinx.serialization.Serializable
 import org.faronovama.application.database.teachersCollection
 import org.litote.kmongo.*
 
+
 fun Route.groupsRoutes() {
     route(Config.groups) {
         get {
             val upWeek =
                 teachersCollection.aggregate<UnwindLesson>(
                     project(
+                        Table::teacher from Teacher::fullName,
                         Table::week from Teacher::table / TimeTable::upWeek,
                     ),
                     unwind("\$week"),
-                    project(UnwindD::classes from UnwindDay::week / Day::classes),
+                    unwind("\$classes"),
+                    project(
+                        UnwindD::teacher from UnwindDay::teacher,
+                        UnwindD::dayOfWeek from UnwindDay::week / Day::dayOfWeek,
+                        UnwindD::classes from UnwindDay::week / Day::classes
+                    )
+                ).map { it.classes.group }.flatten().toSet()
+            val lowWeek =
+                teachersCollection.aggregate<UnwindLesson>(
+                    project(
+                        Table::teacher from Teacher::fullName,
+                        Table::week from Teacher::table / TimeTable::lowWeek,
+                    ),
+                    unwind("\$week"),
+                    project(
+                        UnwindD::teacher from UnwindDay::teacher,
+                        UnwindD::dayOfWeek from UnwindDay::week / Day::dayOfWeek,
+                        UnwindD::classes from UnwindDay::week / Day::classes
+                    ),
                     unwind("\$classes"),
                 ).map { it.classes.group }.flatten().toSet()
 
-            call.respond(upWeek)
-            //println(upWeek)
-            //println(System.currentTimeMillis())
-            /*prettyPrintCursor(teachersCollection.aggregate<UnwindTimeTable>(
-                project(TimeTable::upWeek from Teacher::table / TimeTable::upWeek,
-                    TimeTable::lowWeek from Teacher::table / TimeTable::lowWeek,
-                    ),
-                unwind("\$upWeek"),
-                unwind("\$lowWeek")
-            )
-            )*/
-            /*println(System.currentTimeMillis())
-            val l = teachersCollection.aggregate<TimeTable>(
-                project(TimeTable::upWeek from Teacher::table / TimeTable::upWeek,
-                    TimeTable::lowWeek from Teacher::table / TimeTable::lowWeek,
-                )
-            ).toList().map {
-                (it.lowWeek + it.lowWeek).map { it.classes.map { it.group } }
-            }.flatten().flatten().toSet()
-            println(l)*/
+            call.respond(upWeek + lowWeek)
+        }
+        get("{groupName}") {
+            val group =
+                call.parameters["groupName"] ?: call.respondText("No group name", status = HttpStatusCode.NotFound)
 
-            /*val groups = teachersCollection.aggregate<String>(
-                project(Teacher::table),
-                project(TimeTable::lowWeek, TimeTable::upWeek),
-                unwind("\$upWeek"),
-                unwind("\$lowWeek"),
-                unwind("\$classes"),
-                project(Lesson::group)
-            ).toList()*/
+            val upWeek =
+                teachersCollection.aggregate<UnwindLesson>(
+                    project(
+                        Table::teacher from Teacher::fullName,
+                        Table::week from Teacher::table / TimeTable::upWeek,
+                    ),
+                    unwind("\$week"),
+                    project(
+                        UnwindD::teacher from UnwindDay::teacher,
+                        UnwindD::dayOfWeek from UnwindDay::week / Day::dayOfWeek,
+                        UnwindD::classes from UnwindDay::week / Day::classes
+                    ),
+                    unwind("\$classes"),
+                    match(UnwindLesson::classes / Lesson::group contains (group))
+                ).toList()
+            val lowWeek =
+                teachersCollection.aggregate<UnwindLesson>(
+                    project(
+                        Table::teacher from Teacher::fullName,
+                        Table::week from Teacher::table / TimeTable::lowWeek,
+                    ),
+                    unwind("\$week"),
+                    project(
+                        UnwindD::teacher from UnwindDay::teacher,
+                        UnwindD::dayOfWeek from UnwindDay::week / Day::dayOfWeek,
+                        UnwindD::classes from UnwindDay::week / Day::classes
+                    ),
+                    unwind("\$classes"),
+                    match(UnwindLesson::classes / Lesson::group contains (group))
+                ).toList()
+
+            call.respond(GroupTimeTable(upWeek, lowWeek))
         }
     }
 }
 
 @Serializable
 private class Table(
-    val week: List<Day>,
+    val teacher: String,
+    val week: List<Day>
 )
+
 @Serializable
 private class UnwindDay(
+    val teacher: String,
     val week: Day
 )
+
 @Serializable
 private class UnwindD(
+    val teacher: String,
+    val dayOfWeek: String,
     val classes: List<Lesson>
-)
-@Serializable
-private class UnwindLesson(
-    val classes: Lesson
 )

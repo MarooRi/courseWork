@@ -11,8 +11,6 @@ import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
-import io.ktor.server.websocket.*
-import io.ktor.websocket.*
 import kotlinx.coroutines.delay
 import kotlinx.html.*
 import org.faronovama.application.database.teachersCollection
@@ -26,7 +24,7 @@ fun main() {
     embeddedServer(
         Netty,
         port = 8080,
-        host = "127.0.0.1",
+        host = "192.168.0.120",
         watchPaths = listOf("classes")
     ) {
         main()
@@ -36,7 +34,7 @@ fun main() {
 fun Application.main() {
     static()
     rest()
-    teachersCollection.ensureIndex(Teacher::fullName, indexOptions = IndexOptions().unique(true) )
+    teachersCollection.ensureIndex(Teacher::fullName, indexOptions = IndexOptions().unique(true))
 }
 
 

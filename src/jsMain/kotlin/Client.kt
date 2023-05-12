@@ -1,18 +1,16 @@
-import classes.Teacher
 import classes.TimeTable
-import classes.UpdateSchedule
-import classes.json
-import components.CTable
+import classes.TypeOfWeek
+import components.table.CTable
+import components.groups.CGroupContainer
 import components.reader
+import components.table.CMode
 import js.core.get
 import js.core.jso
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import queryError.QueryError
-import react.FC
-import react.Props
-import react.create
+import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
@@ -21,7 +19,6 @@ import react.dom.html.ReactHTML.select
 import react.router.Route
 import react.router.Routes
 import react.router.dom.HashRouter
-import react.router.dom.Link
 import react.router.useParams
 import tanstack.query.core.QueryClient
 import tanstack.query.core.QueryKey
@@ -41,6 +38,8 @@ fun main() {
     createRoot(container).render(app.create())
 }
 
+val typeOfWeek = createContext(TypeOfWeek.upWeek)
+
 val app = FC<Props>("App") {
     HashRouter {
         QueryClientProvider {
@@ -53,8 +52,16 @@ val app = FC<Props>("App") {
                     element = teacherChoose.create {}
                 }
                 Route {
-                    path = "/"
+                    path = "/1"
                     element = reader.create()
+                }
+                Route {
+                    path = "/312"
+                    element = CGroupContainer.create()
+                }
+                Route {
+                    path = "/"
+                    element = container.create()
                 }
             }
         }
@@ -111,6 +118,8 @@ val teacherChoose = FC<Props> {
 }
 
 val container = FC<Props> {
+    val (mode, setMode) = useState(TypeOfWeek.upWeek)
+
     val query = useQuery<String, QueryError, String, QueryKey>(
         queryKey = arrayOf("teacherLessons").unsafeCast<QueryKey>(),
         queryFn = {
@@ -126,10 +135,16 @@ val container = FC<Props> {
             +"Error"
         }
     } else {
-        val lessons = Json.decodeFromString<TimeTable>(query.data ?: "")
+        CMode {
+            _mode = mode
+            _setMode = setMode
+        }
 
-        CTable {
-            table = lessons
+        val lessons = Json.decodeFromString<TimeTable>(query.data ?: "")
+        typeOfWeek.Provider(mode){
+            CTable {
+                table = lessons
+            }
         }
     }
 }

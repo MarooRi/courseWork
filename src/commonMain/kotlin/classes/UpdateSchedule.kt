@@ -15,7 +15,7 @@ data class UpdateSchedule(
 
 val UpdateSchedule.json
     get() = Json.encodeToString(this)
-
+@Serializable
 enum class TypeOfWeek {
     upWeek, lowWeek
 }
@@ -23,3 +23,14 @@ enum class TypeOfWeek {
 enum class TypeOfButton {
     Up, Down, Left, Right
 }
+@Serializable
+class GroupTimeTable(
+    val upWeek: List<UnwindLesson>,
+    val lowWeek: List<UnwindLesson>
+)
+@Serializable
+class UnwindLesson(
+    val teacher: String,
+    val dayOfWeek: String,
+    val classes: Lesson
+)

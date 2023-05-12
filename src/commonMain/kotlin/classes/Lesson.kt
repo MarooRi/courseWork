@@ -7,4 +7,5 @@ data class Lesson (
     val group: List<String> = emptyList(),
     val classRoom: String = "",
     val name: String = "",
+    val time: Int = -1
 )
