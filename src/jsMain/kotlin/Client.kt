@@ -1,9 +1,14 @@
+import classes.AddTeachersToDatabase
 import classes.TimeTable
+import classes.TypeOfAction
 import classes.TypeOfWeek
 import components.table.CTable
 import components.groups.CGroupContainer
 import components.reader
 import components.table.CMode
+import csstype.ClassName
+import csstype.Color
+import emotion.react.css
 import js.core.get
 import js.core.jso
 import kotlinx.serialization.decodeFromString
@@ -14,12 +19,17 @@ import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.input
+import react.dom.html.ReactHTML.label
 import react.dom.html.ReactHTML.option
 import react.dom.html.ReactHTML.select
+import react.dom.html.ReactHTML.span
+import react.dom.html.ReactHTML.style
 import react.router.Route
 import react.router.Routes
 import react.router.dom.HashRouter
 import react.router.useParams
+import styles.Styles
 import tanstack.query.core.QueryClient
 import tanstack.query.core.QueryKey
 import tanstack.react.query.QueryClientProvider
@@ -31,6 +41,7 @@ import tools.HTTPResult
 import tools.fetch
 import tools.fetchText
 import web.dom.document
+import web.html.InputType
 import kotlin.js.json
 
 fun main() {
@@ -52,7 +63,7 @@ val app = FC<Props>("App") {
                     element = teacherChoose.create {}
                 }
                 Route {
-                    path = "/1"
+                    path = "/"
                     element = reader.create()
                 }
                 Route {
@@ -60,7 +71,7 @@ val app = FC<Props>("App") {
                     element = CGroupContainer.create()
                 }
                 Route {
-                    path = "/"
+                    path = "/222"
                     element = container.create()
                 }
             }
@@ -71,6 +82,7 @@ val app = FC<Props>("App") {
 val teacherChoose = FC<Props> {
     val param = useParams()["file"]!!
     val queryClient = useQueryClient()
+    var action by useState(TypeOfAction.AddTeacher)
 
     val query = useQuery<String, QueryError, String, QueryKey>(
         queryKey = arrayOf("teachersNames").unsafeCast<QueryKey>(),
@@ -78,8 +90,14 @@ val teacherChoose = FC<Props> {
             fetchText(Config.schedule + "namesFromExcel/${param}")
         })
 
-    val updateMutation = useMutation<HTTPResult, Any, List<String>, Any>(
-        mutationFn = { list ->
+    val teacherInDBQuery = useQuery<String, QueryError, String, QueryKey>(
+        queryKey = arrayOf("teachers").unsafeCast<QueryKey>(),
+        queryFn = {
+            fetchText(Config.teachers + "allNames")
+        })
+
+    val updateMutation = useMutation<HTTPResult, Any, AddTeachersToDatabase, Any>(
+        mutationFn = { command ->
             fetch(
                 Config.schedule + "loadSchedule/" + param,
                 jso {
@@ -87,31 +105,62 @@ val teacherChoose = FC<Props> {
                     headers = json(
                         "Content-Type" to "application/json"
                     )
-                    body = Json.encodeToString(list)
+                    body = Json.encodeToString(command)
                 }
             )
         },
         options = jso {
             onSuccess = { _: Any, _: Any, _: Any? ->
                 queryClient.invalidateQueries<Any>(arrayOf("teacherLessons").unsafeCast<QueryKey>())
+                queryClient.invalidateQueries<Any>(arrayOf("teachers").unsafeCast<QueryKey>())
             }
         }
     )
 
-    if (query.isSuccess) {
+    if (query.isSuccess && teacherInDBQuery.isSuccess) {
         val data = Json.decodeFromString<List<String>>(query.data ?: "")
+        val teachersInDB = try {
+            Json.decodeFromString<List<String>>(teacherInDBQuery.data ?: "")
+        }catch (e: Exception){
+            emptyList()
+        }
 
         select {
             data.map {
                 option {
+                    if (teachersInDB.contains(it))
+                        css {
+                            backgroundColor = Color("#FF0000")
+                        }
                     +it
                 }
             }
         }
-        button{
+        span {
+           TypeOfAction.values().map { typeAction ->
+               input {
+                   type = InputType.radio
+                   name = "typeOfAction"
+                   value = it
+                   id = typeAction.name
+                   if (typeAction == action){
+                       checked = true
+                   }
+                   onClick = {
+                       action = typeAction
+                   }
+               }
+               label {
+                   form = typeAction.name
+                   + typeAction.nameOfAction
+               }
+           }
+        }
+
+        button {
             +"submit"
             onClick = {
-                updateMutation.mutateAsync(data, null)
+                updateMutation.mutateAsync(AddTeachersToDatabase(listOf("доц. Каштанов А.Л."), action), null)
             }
         }
     }
@@ -128,7 +177,15 @@ val container = FC<Props> {
 
     if (query.isLoading) {
         div {
-            +"Loading"
+            style {
+                +Styles.animation
+            }
+
+            className = ClassName("spin-wrapper")
+            div {
+                className = ClassName("spinner")
+
+            }
         }
     } else if (query.isError) {
         div {
@@ -141,7 +198,7 @@ val container = FC<Props> {
         }
 
         val lessons = Json.decodeFromString<TimeTable>(query.data ?: "")
-        typeOfWeek.Provider(mode){
+        typeOfWeek.Provider(mode) {
             CTable {
                 table = lessons
             }

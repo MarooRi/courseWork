@@ -1,8 +1,7 @@
 package org.faronovama.application.rest
 
 import Config
-import classes.Teacher
-import classes.UpdateSchedule
+import classes.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -14,9 +13,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import org.faronovama.application.database.loadSelectTeachers
 import org.faronovama.application.database.readListTeachers
 import org.faronovama.application.database.teachersCollection
-import org.litote.kmongo.eq
-import org.litote.kmongo.findOne
-import org.litote.kmongo.updateMany
+import org.litote.kmongo.*
 import java.io.File
 
 
@@ -26,7 +23,6 @@ fun Route.scheduleRoutes() {
             val teacherName = call.parameters["teacherName"] ?: return@get call.respondText(
                 "Missing or malformed id", status = HttpStatusCode.BadRequest
             )
-
             val teacher = teachersCollection.findOne(Teacher::fullName eq teacherName)
                 ?: return@get call.respondText("Нет учителя с таким именем", status = HttpStatusCode.NotFound)
 
@@ -39,6 +35,7 @@ fun Route.scheduleRoutes() {
             )
 
             val teachers = readListTeachers("uploads/$fileName")
+
             if (teachers.isEmpty()) {
                 return@get call.respondText("Empty file", status = HttpStatusCode.NotFound)
             } else {
@@ -69,14 +66,59 @@ fun Route.scheduleRoutes() {
             }
         }
         post("loadSchedule/{fileName}") {
-            val teachersName = call.receive<List<String>>()
+            val command = call.receive<AddTeachersToDatabase>()
             val fileName =
                 call.parameters["fileName"] ?: call.respondText("No file name", status = HttpStatusCode.NotFound)
 
-            if (teachersName.isEmpty()) {
+            if (command.teachers.isEmpty()) {
                 call.respondText("No teachers name", status = HttpStatusCode.NotFound)
             } else {
-                loadSelectTeachers(teachersName, "./uploads/${fileName}", )
+                val teachers = loadSelectTeachers(command.teachers, "./uploads/${fileName}")
+
+                when (command.typeOfAction) {
+                    TypeOfAction.AddTeacher -> {
+                        teachersCollection.insertMany(teachers)
+                    }
+
+                    TypeOfAction.SumSchedule -> {
+                        teachers.map {
+                            val teacher = teachersCollection.findOne(Teacher::fullName eq it.fullName)
+                                ?: return@post call.respondText("No teacher in BD", status = HttpStatusCode.NotFound)
+
+                            val newScheduleUpWeek = teacher.table.upWeek.map { day ->
+                                Day(
+                                    day.dayOfWeek,
+                                    day.classes + it.table.upWeek.find { it.dayOfWeek == day.dayOfWeek }!!.classes
+                                )
+                            }
+
+                            val newScheduleLowWeek = teacher.table.lowWeek.map { day ->
+                                Day(
+                                    day.dayOfWeek,
+                                    day.classes + it.table.upWeek.find { it.dayOfWeek == day.dayOfWeek }!!.classes
+                                )
+                            }
+
+                            teachersCollection.updateOne(
+                                Teacher::fullName eq it.fullName,
+                                setValue(Teacher::table, TimeTable(newScheduleUpWeek, newScheduleLowWeek))
+                            )
+                        }
+                    }
+
+                    TypeOfAction.ReplaceSchedule -> {
+                        teachers.map {
+                            teachersCollection.updateOne(
+                                Teacher::fullName eq it.fullName,
+                                setValue(
+                                    Teacher::table,
+                                    it.table
+                                )
+                            )
+                        }
+                    }
+                }
+
             }
         }
         put("updateLesson") {

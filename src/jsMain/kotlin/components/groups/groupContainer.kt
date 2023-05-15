@@ -172,7 +172,7 @@ val CTimeProps = FC<TimeProps> { props ->
                                     tr {
                                         td {
 
-                                            +(it.classes.name + " " + it.classes.classRoom)
+                                            +(it.classes.name + " " + it.classes.classRoom + " " + it.teacher)
                                         }
                                     }
                                 }

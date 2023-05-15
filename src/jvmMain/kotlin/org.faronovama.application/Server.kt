@@ -24,7 +24,7 @@ fun main() {
     embeddedServer(
         Netty,
         port = 8080,
-        host = "192.168.0.120",
+        host = "127.0.0.1",
         watchPaths = listOf("classes")
     ) {
         main()

@@ -20,6 +20,11 @@ enum class TypeOfWeek {
     upWeek, lowWeek
 }
 
+@Serializable
+enum class TypeOfAction(val nameOfAction: String) {
+    AddTeacher("Добавить преподавателя"), SumSchedule("Cоединить расписание"), ReplaceSchedule("Поменять расписание")
+}
+
 enum class TypeOfButton {
     Up, Down, Left, Right
 }

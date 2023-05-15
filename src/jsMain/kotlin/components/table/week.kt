@@ -7,11 +7,15 @@ import classes.UpdateSchedule
 import components.CButtons
 import components.lessons.CEditLesson
 import components.lessons.CLesson
+import js.core.get
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML
+import react.router.useParams
+import react.useContext
 import react.useState
 import styles.Styles
+import typeOfWeek
 import kotlin.js.Date
 
 external interface WeekProps : Props {
@@ -21,6 +25,8 @@ external interface WeekProps : Props {
 
 val CWeek = FC<WeekProps>("Week") { props ->
     var position by useState(listOf(-1, -1))
+    val typeOfWeek = useContext(typeOfWeek)
+    val param = "доц. Альтман Е.А."
     val daysOfWeek = listOf(
         "Понедельник",
         "Вторник",
@@ -69,11 +75,13 @@ val CWeek = FC<WeekProps>("Week") { props ->
                                     newWeek[day].classes = newWeek[day].classes.mapIndexed { index, elem ->
                                         if (time == index) it else elem
                                     }
-                                    props.update(UpdateSchedule(
-                                        TypeOfWeek.upWeek,
-                                        "доц. Альтман Е.А.",
-                                        newWeek
-                                    ))
+                                    props.update(
+                                        UpdateSchedule(
+                                            typeOfWeek,
+                                            param,
+                                            newWeek
+                                        )
+                                    )
                                     position = listOf(-1, -1)
                                 }
                                 key = Date.now().toString()
@@ -97,18 +105,7 @@ val CWeek = FC<WeekProps>("Week") { props ->
     if (position[0] != -1 || position[1] != -1) {
         CButtons {
             save = {
-                val newWeek = props.week.toMutableList()
-
-                if (it == TypeOfButton.Up) {
-                    newWeek[position[1]] = props.week[position[1]].copy(
-                        classes = swapLessons(
-                            props.week[position[1]].classes.toMutableList(),
-                            position[0],
-                            position[0] - 1
-                        )
-                    )
-                    props.update(UpdateSchedule(TypeOfWeek.upWeek, "доц. Альтман Е.А.", newWeek.toList()))
-                }
+                props.update(UpdateSchedule(typeOfWeek, param, buttonsChange(props.week.toMutableList(), it, position[1], position[0])))
             }
         }
     }

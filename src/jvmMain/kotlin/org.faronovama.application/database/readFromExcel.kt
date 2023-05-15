@@ -11,7 +11,7 @@ import java.io.FileInputStream
 
 val regexp = Regex("(\\d{2}[а-я])+")
 
-fun loadSelectTeachers(listTeachers: List<String>, filepath: String){
+fun loadSelectTeachers(listTeachers: List<String>, filepath: String): List<Teacher>{
     val fileInputsStream = FileInputStream(filepath)
     val xlWbs = WorkbookFactory.create(fileInputsStream)
     val tables = xlWbs.getSheetAt(0)
@@ -36,5 +36,6 @@ fun loadSelectTeachers(listTeachers: List<String>, filepath: String){
             }
         }
     }
-    teachersCollection.insertMany(teachers)
+    //teachersCollection.insertMany(teachers)
+    return teachers
 }
