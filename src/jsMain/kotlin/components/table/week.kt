@@ -1,17 +1,13 @@
 package components.table
 
 import classes.Day
-import classes.TypeOfButton
-import classes.TypeOfWeek
 import classes.UpdateSchedule
 import components.CButtons
 import components.lessons.CEditLesson
 import components.lessons.CLesson
-import js.core.get
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML
-import react.router.useParams
 import react.useContext
 import react.useState
 import styles.Styles

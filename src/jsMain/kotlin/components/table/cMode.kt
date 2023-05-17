@@ -1,14 +1,12 @@
 package components.table
 
-import classes.TimeTable
 import classes.TypeOfWeek
-import classes.UpdateSchedule
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
-import react.*
+import react.FC
+import react.Props
+import react.StateSetter
 import react.dom.events.MouseEventHandler
 import react.dom.html.ReactHTML
+import react.useRef
 import web.html.HTMLInputElement
 import web.html.InputType
 

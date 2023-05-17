@@ -2,23 +2,16 @@ package components.table
 
 import Config
 import classes.*
-import components.CButtons
-import components.lessons.CEditLesson
-import components.lessons.CLesson
 import js.core.jso
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
 import react.useContext
-import react.useState
-import styles.Styles
 import tanstack.query.core.QueryKey
 import tanstack.react.query.useMutation
 import tanstack.react.query.useQueryClient
 import tools.HTTPResult
 import tools.fetch
 import typeOfWeek
-import kotlin.js.Date.Companion.now
 import kotlin.js.json
 
 external interface Table : Props {

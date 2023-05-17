@@ -2,10 +2,10 @@ import classes.AddTeachersToDatabase
 import classes.TimeTable
 import classes.TypeOfAction
 import classes.TypeOfWeek
-import components.table.CTable
 import components.groups.CGroupContainer
 import components.reader
 import components.table.CMode
+import components.table.CTable
 import csstype.ClassName
 import csstype.Color
 import emotion.react.css

@@ -15,6 +15,8 @@ import org.faronovama.application.database.readListTeachers
 import org.faronovama.application.database.teachersCollection
 import org.litote.kmongo.*
 import java.io.File
+import java.time.LocalTime.now
+import java.util.*
 
 
 fun Route.scheduleRoutes() {
@@ -45,13 +47,15 @@ fun Route.scheduleRoutes() {
         post("loadExcel") {
             val multiPartData = call.receiveMultipart()
             var fileName = ""
+            val time = Date().time.toString()
+
 
             multiPartData.forEachPart { part ->
                 when (part) {
                     is PartData.FileItem -> {
                         fileName = part.originalFileName as String
                         val fileBytes = part.streamProvider().readBytes()
-                        File("uploads/$fileName").writeBytes(fileBytes)
+                        File("uploads/$time.xlsx").writeBytes(fileBytes)
                     }
 
                     else -> {}
@@ -59,10 +63,10 @@ fun Route.scheduleRoutes() {
                 part.dispose()
             }
             if (!fileName.endsWith(".xlsx")) {
-                File("uploads/$fileName").delete()
+                File("uploads/$time.xlsx").delete()
                 return@post call.respondRedirect("/")
             } else {
-                return@post call.respondRedirect("/#/home/${fileName}")
+                return@post call.respondRedirect("/#/home/${time}.xlsx")
             }
         }
         post("loadSchedule/{fileName}") {
