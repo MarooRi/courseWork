@@ -13,7 +13,9 @@ import kotlinx.serialization.json.encodeToJsonElement
 import org.faronovama.application.database.loadSelectTeachers
 import org.faronovama.application.database.readListTeachers
 import org.faronovama.application.database.teachersCollection
+import org.faronovama.application.database.writeToExcelFile
 import org.litote.kmongo.*
+import java.awt.Desktop
 import java.io.File
 import java.time.LocalTime.now
 import java.util.*
@@ -134,6 +136,14 @@ fun Route.scheduleRoutes() {
                 " {'\$set': {'table.${updateData.typeOfWeek}':" +
                         " $classesInJson}}"
             )
+        }
+        post ("getExcelFile") {
+            val path = call.receive<String>()
+
+            writeToExcelFile("${path}/write.xlsx")
+            val desk = Desktop.getDesktop()
+            desk.open(File(path))
+            call.respondText("File loaded", status = HttpStatusCode.Created)
         }
     }
 }

@@ -79,6 +79,34 @@ val app = FC<Props>("App") {
     }
 }
 
+val CLoadExcel = FC<Props> {
+
+    val updateMutation = useMutation<HTTPResult, Any, String, Any>(
+        mutationFn = { path ->
+            fetch(
+                Config.schedule + "getExcelFile",
+                jso {
+                    method = "POST"
+                    headers = json(
+                        "Content-Type" to "application/json"
+                    )
+                    body = path
+                }
+            )
+        }
+    )
+    input {
+        type = InputType.file
+
+    }
+    button {
+        + "Load"
+        onClick = {
+            updateMutation.mutateAsync("C:\\Users\\Public\\Downloads", null)
+        }
+    }
+}
+
 val teacherChoose = FC<Props> {
     val param = useParams()["file"]!!
     val queryClient = useQueryClient()
