@@ -1,18 +1,21 @@
-package components.table
+package components.edit
+
 
 import classes.Day
 import classes.UpdateSchedule
-import components.CButtons
-import components.lessons.CEditLesson
-import components.lessons.CLesson
+import components.edit.lessons.CEditLesson
+import components.edit.lessons.CLesson
+import js.core.get
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML
+import react.router.useParams
 import react.useContext
 import react.useState
 import styles.Styles
 import typeOfWeek
 import kotlin.js.Date
+
 
 external interface WeekProps : Props {
     var week: List<Day>
@@ -20,9 +23,9 @@ external interface WeekProps : Props {
 }
 
 val CWeek = FC<WeekProps>("Week") { props ->
+    val param = useParams()["teacher"]!!
     var position by useState(listOf(-1, -1))
     val typeOfWeek = useContext(typeOfWeek)
-    val param = "доц. Альтман Е.А."
     val daysOfWeek = listOf(
         "Понедельник",
         "Вторник",
@@ -55,7 +58,6 @@ val CWeek = FC<WeekProps>("Week") { props ->
                 }
             }
         }
-
         for (time in 0..times.lastIndex) {
             ReactHTML.tr {
                 ReactHTML.td {

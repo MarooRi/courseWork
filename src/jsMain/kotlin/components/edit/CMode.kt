@@ -49,7 +49,12 @@ val CMode = FC<modeProps>("Table") { props ->
                 name = "outputMode"
                 checked = props._mode.name == week.name
             }
-            + week.name
+            if(index == 0){
+                + "нечетная"
+            }else{
+                +"четная"
+            }
+
         }
     }
 

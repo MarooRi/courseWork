@@ -1,4 +1,4 @@
-package components
+package components.edit
 
 import classes.TypeOfButton
 import csstype.Display

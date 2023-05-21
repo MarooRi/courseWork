@@ -1,4 +1,4 @@
-package components.table
+package components.edit
 
 import Config
 import classes.*
@@ -45,13 +45,12 @@ val CTable = FC<Table>("Table") { props ->
     )
 
     CWeek {
-        week = if (type == TypeOfWeek.upWeek) lessons.upWeek else lessons.lowWeek
+        week = if(type == TypeOfWeek.upWeek) lessons.upWeek else lessons.lowWeek
         update = {
             updateMutation.mutateAsync(it, null)
         }
     }
 }
-
 
 fun buttonsChange(lessons: MutableList<Day>, type: TypeOfButton, x: Int, y: Int): List<Day> {
     when (type) {

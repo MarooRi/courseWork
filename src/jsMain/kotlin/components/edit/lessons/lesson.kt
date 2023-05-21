@@ -1,4 +1,4 @@
-package components.lessons
+package components.edit.lessons
 
 import classes.Lesson
 import react.FC
