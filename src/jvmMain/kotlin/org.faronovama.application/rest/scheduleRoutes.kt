@@ -85,33 +85,6 @@ fun Route.scheduleRoutes() {
                     TypeOfAction.AddTeacher -> {
                         teachersCollection.insertMany(teachers)
                     }
-
-                    TypeOfAction.SumSchedule -> {
-                        teachers.map {
-                            val teacher = teachersCollection.findOne(Teacher::fullName eq it.fullName)
-                                ?: return@post call.respondText("No teacher in BD", status = HttpStatusCode.NotFound)
-
-                            val newScheduleUpWeek = teacher.table.upWeek.map { day ->
-                                Day(
-                                    day.dayOfWeek,
-                                    day.classes + it.table.upWeek.find { it.dayOfWeek == day.dayOfWeek }!!.classes
-                                )
-                            }
-
-                            val newScheduleLowWeek = teacher.table.lowWeek.map { day ->
-                                Day(
-                                    day.dayOfWeek,
-                                    day.classes + it.table.upWeek.find { it.dayOfWeek == day.dayOfWeek }!!.classes
-                                )
-                            }
-
-                            teachersCollection.updateOne(
-                                Teacher::fullName eq it.fullName,
-                                setValue(Teacher::table, TimeTable(newScheduleUpWeek, newScheduleLowWeek))
-                            )
-                        }
-                    }
-
                     TypeOfAction.ReplaceSchedule -> {
                         teachers.map {
                             teachersCollection.updateOne(
